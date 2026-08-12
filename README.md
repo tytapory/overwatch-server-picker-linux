@@ -3,6 +3,7 @@
 A simple CLI tool to select Overwatch servers on Linux.
 
 ### Dependencies
+* `golang`
 * `nftables` OR `iptables` + `ipset`
   
 ### Usage
