@@ -164,9 +164,9 @@ func getNearestServer(servers []Server) (Server, error) {
 		}
 
 		if currentPing < math.MaxFloat64 {
-			fmt.Printf("%s ping %f\n", server.Name, currentPing)
+			fmt.Printf("%s ping %dms\n", server.Name, int(currentPing))
 		} else {
-			fmt.Printf("%s no responce\n", server.Name)
+			fmt.Printf("%s no response\n", server.Name)
 		}
 	}
 
