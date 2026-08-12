@@ -1,22 +1,22 @@
 [
   {
     "name": "USA_Central",
-    "token": "ord1",
+    "ping": "8.34.210.23",
     "ipv4": [
       "64.224.0.0/21",
       "24.105.40.0/21"
     ]
   },
   {
-    "name": "USA_West",
-    "token": "las1",
+    "name": "USA_Southwest",
+    "ping": "34.16.128.39",
     "ipv4": [
       "64.224.24.0/23"
     ]
   },
   {
     "name": "South_Korea",
-    "token": "icn1",
+    "ping": "34.64.64.15",
     "ipv4": [
       "110.45.208.0/24",
       "117.52.6.0/24",
@@ -33,22 +33,22 @@
   },
   {
     "name": "Australia",
-    "token": "syd2",
+    "ping": "34.40.128.34",
     "ipv4": [
       "158.115.196.0/23"
     ]
   },
   {
     "name": "Taiwan",
-    "token": "tpe1",
+    "ping": "34.80.0.4",
     "ipv4": [
       "5.42.160.0/22",
       "5.42.164.0/22"
     ]
   },
   {
-    "name": "Europe_West",
-    "token": "ams1",
+    "name": "Netherlands",
+    "ping": "137.221.78.60",
     "ipv4": [
       "64.224.26.0/23"
     ]

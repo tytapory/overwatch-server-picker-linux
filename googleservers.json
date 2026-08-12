@@ -1,8 +1,26 @@
 {
-  "southamerica-east1": "Brazil2",
-  "europe-north1": "Finland2",
-  "me-central2": "Saudi_Arabia",
-  "asia-southeast1": "Singapore2",
-  "asia-northeast1": "Japan2",
-  "us-east4": "Usa_East2"
+  "southamerica-east1": {
+	"name": "Brazil2",
+  	"ping": "34.39.128.0"
+  },
+  "europe-north1": {
+	"name": "Finland2",
+	"ping": "34.88.0.1"
+  },
+  "me-central2": {
+	"name": "Saudi_Arabia",
+  	"ping": "34.166.0.85"
+  },
+  "asia-southeast1": {
+	"name": "Singapore2",
+	"ping": "34.1.128.4"
+  },
+  "asia-northeast1": {
+	"name": "Japan2",
+	"ping": "34.84.0.0"
+  },
+  "us-east4": {
+	"name": "Usa_East2",
+	"ping": "8.228.65.55"
+  }
 }

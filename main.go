@@ -4,13 +4,18 @@ import (
 	"cmp"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+	"net/netip"
 	"os"
 	"os/exec"
 	"os/signal"
 	"slices"
 	"strings"
 	"syscall"
+	"time"
+
+	probing "github.com/prometheus-community/pro-bing"
 )
 
 const (
@@ -28,6 +33,7 @@ type Server struct {
 	Name      string   `json:"name"`
 	IPv4      []string `json:"ipv4,omitempty"`
 	IPv6      []string `json:"ipv6,omitempty"`
+	Ping      string   `json:"ping,omitempty"`
 	IsBlocked bool
 }
 
@@ -83,9 +89,87 @@ func main() {
 }
 
 func auto() error {
-	result, err := getServers()
-	fmt.Println(result)
-	return err
+	fmt.Print("\033c")
+	servers, err := getServers()
+	if err != nil {
+		return err
+	}
+
+	bestServer, err := getNearestServer(servers)
+	if err != nil {
+		return err
+	}
+
+	for i := range servers {
+		if servers[i].Name != bestServer.Name {
+			servers[i].IsBlocked = true
+		}
+	}
+
+	fmt.Printf("Nearest server: %s\n\n", bestServer.Name)
+
+	return runService(servers)
+}
+
+func getNearestServer(servers []Server) (Server, error) {
+	nearestServer := servers[0]
+	smallestPing := math.MaxFloat64
+
+	for _, server := range servers {
+		fmt.Printf("Testing %s...\n", server.Name)
+
+		currentPing := math.MaxFloat64
+		if server.Ping != "" {
+			var err error
+
+			currentPing, err = ping(server.Ping)
+			if err != nil {
+				currentPing = math.MaxFloat64
+			}
+		}
+
+		if currentPing == math.MaxFloat64 {
+			var (
+				prefix netip.Prefix
+				err    error
+			)
+			if len(server.IPv4) > 0 {
+				prefix, err = netip.ParsePrefix(server.IPv4[0])
+				if err != nil {
+					return nearestServer, err
+				}
+			} else if len(server.IPv6) > 0 {
+				prefix, err = netip.ParsePrefix(server.IPv6[0])
+				if err != nil {
+					return nearestServer, err
+				}
+			} else {
+				return nearestServer, fmt.Errorf("ip were not provided: %s", server.Name)
+			}
+
+			for i := 1; i < 10 && currentPing == math.MaxFloat64; i++ {
+				addr := prefix.Addr()
+
+				currentPing, err = ping(addr.String())
+				if err != nil {
+					currentPing = math.MaxFloat64
+				}
+			}
+		}
+
+		if currentPing < smallestPing {
+			smallestPing = currentPing
+			nearestServer = server
+		}
+
+		fmt.Printf("%s ping %f\n", server.Name, currentPing)
+	}
+
+	if smallestPing == math.MaxFloat64 {
+		return nearestServer, fmt.Errorf("non of the servers responded")
+	}
+
+	return nearestServer, nil
 }
 
 func manual() error {
@@ -97,8 +181,8 @@ func manual() error {
 	selection := 0
 
 	fmt.Print("\033c")
-	for selection != 5 {
-		fmt.Print("Select action:\n\n1) Block\n2) Block all\n3) Unblock\n4) Unblock all\n5) Start service\n\n\n")
+	for selection != 6 {
+		fmt.Print("Select action:\n\n1) Block\n2) Block all\n3) Unblock\n4) Unblock all\n5) Lock all except for one\n6) Start service\n\n\n")
 
 		fmt.Print("Current servers:\n\n")
 		printServers(servers)
@@ -144,6 +228,24 @@ func manual() error {
 				servers[i].IsBlocked = false
 			}
 		case 5:
+			for i := range servers {
+				servers[i].IsBlocked = true
+			}
+
+			fmt.Print("Select server to unblock\n\n")
+			printServers(servers)
+
+			fmt.Scanf("%d", &selection)
+
+			fmt.Print("\033c")
+			if selection < 1 || selection > len(servers) {
+				fmt.Printf("Invalid choice: %d. ", selection)
+			} else {
+				servers[selection-1].IsBlocked = false
+			}
+
+			selection = 0
+		case 6:
 		default:
 			fmt.Printf("Invalid choice: %d. ", selection)
 		}
@@ -292,6 +394,32 @@ func runServiceIptables(servers []Server) error {
 	select {}
 }
 
+func ping(address string) (float64, error) {
+	pinger, err := probing.NewPinger(address)
+	if err != nil {
+		return 0, err
+	}
+
+	pinger.Count = 4
+	pinger.Interval = 900 * time.Millisecond
+	pinger.Timeout = 2 * time.Second
+	pinger.Size = 56
+	pinger.SetPrivileged(true)
+
+	err = pinger.Run()
+	if err != nil {
+		return 0, err
+	}
+
+	stats := pinger.Statistics()
+
+	if stats.PacketsRecv == 0 {
+		return 0, fmt.Errorf("ping to %s failed (100%% packet loss)", address)
+	}
+
+	return float64(stats.AvgRtt.Milliseconds()), nil
+}
+
 func runCmd(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 
@@ -340,7 +468,7 @@ func getServers() ([]Server, error) {
 		return nil, err
 	}
 
-	var googleServersMap map[string]string
+	var googleServersMap map[string]Server
 	err = json.Unmarshal(bytes, &googleServersMap)
 	if err != nil {
 		return nil, err
@@ -350,7 +478,8 @@ func getServers() ([]Server, error) {
 	for _, prefix := range googlePrefixes.Prefixes {
 		if googleServer, ok := googleServersMap[prefix.Scope]; ok {
 			temp := serversMap[prefix.Scope]
-			temp.Name = googleServer
+			temp.Name = googleServer.Name
+			temp.Ping = googleServer.Ping
 			if prefix.IPv4Prefix != "" {
 				temp.IPv4 = append(temp.IPv4, prefix.IPv4Prefix)
 			}
