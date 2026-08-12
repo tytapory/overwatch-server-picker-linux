@@ -49,7 +49,7 @@ type GooglePrefix struct {
 
 func main() {
 	if os.Geteuid() != 0 {
-		fmt.Println("you have to run as root")
+		fmt.Println("Root privileges are required.")
 
 		return
 	}
@@ -144,7 +144,7 @@ func getNearestServer(servers []Server) (Server, error) {
 					return nearestServer, err
 				}
 			} else {
-				return nearestServer, fmt.Errorf("ip were not provided: %s", server.Name)
+				return nearestServer, fmt.Errorf("no IP address provided for server: %s", server.Name)
 			}
 
 			for i := 1; i < 10 && currentPing == math.MaxFloat64; i++ {
@@ -166,7 +166,7 @@ func getNearestServer(servers []Server) (Server, error) {
 	}
 
 	if smallestPing == math.MaxFloat64 {
-		return nearestServer, fmt.Errorf("non of the servers responded")
+		return nearestServer, fmt.Errorf("none of the servers responded")
 	}
 
 	return nearestServer, nil
@@ -270,7 +270,7 @@ func runService(servers []Server) error {
 		return fmt.Errorf("iptables found but ipset not found")
 	}
 
-	return fmt.Errorf("neither nftables nor iptables+ipset found")
+	return fmt.Errorf("neither nftables nor iptables+ipset were found")
 }
 
 func runServiceNft(servers []Server) error {
@@ -343,7 +343,7 @@ func runServiceNft(servers []Server) error {
 		return err
 	}
 
-	fmt.Println("service running. press ctrl + c to to exit")
+	fmt.Println("Service is running. Press Ctrl+C to exit.")
 
 	select {}
 }
