@@ -333,14 +333,18 @@ func runServiceNft(servers []Server) error {
 		}
 	}
 
-	err = runCmd(nft, "add", "element", "inet", nftTableName, ipsetNameIPv4, "{", ipv4Servers.String(), "}")
-	if err != nil {
-		return err
+	if ipv4Servers.Len() > 0 {
+		err = runCmd(nft, "add", "element", "inet", nftTableName, ipsetNameIPv4, "{", ipv4Servers.String(), "}")
+		if err != nil {
+			return err
+		}
 	}
 
-	err = runCmd(nft, "add", "element", "inet", nftTableName, ipsetNameIPv6, "{", ipv6Servers.String(), "}")
-	if err != nil {
-		return err
+	if ipv6Servers.Len() > 0 {
+		err = runCmd(nft, "add", "element", "inet", nftTableName, ipsetNameIPv6, "{", ipv6Servers.String(), "}")
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("Service is running. Press Ctrl+C to exit.")
