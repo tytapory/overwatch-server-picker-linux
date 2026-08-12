@@ -208,6 +208,10 @@ func runServiceNft(servers []Server) error {
 	)
 
 	for _, server := range servers {
+		if !server.IsBlocked {
+			continue
+		}
+
 		if len(server.IPv4) > 0 {
 			for _, ip := range server.IPv4 {
 				if ipv4Servers.Len() > 0 {
@@ -264,6 +268,10 @@ func runServiceIptables(servers []Server) error {
 	}
 
 	for _, server := range servers {
+		if !server.IsBlocked {
+			continue
+		}
+
 		for _, ip := range server.IPv4 {
 			err = runCmd(ipset, "add", ipsetNameIPv4, ip, "-exist")
 			if err != nil {
@@ -279,7 +287,9 @@ func runServiceIptables(servers []Server) error {
 		}
 	}
 
-	return nil
+	fmt.Println("service running. press ctrl + c to to exit")
+
+	select {}
 }
 
 func runCmd(name string, args ...string) error {
