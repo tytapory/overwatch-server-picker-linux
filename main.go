@@ -119,15 +119,8 @@ func manual() error {
 	return nil
 }
 
-func printServers(servers []Server) {
-	for i, server := range servers {
-		fmt.Printf("%d) %s: ", i+1, server.Name)
-		if server.IsBlocked {
-			fmt.Println("Blocked")
-		} else {
-			fmt.Println("Available")
-		}
-	}
+func runService(servers Server) error {
+
 }
 
 func getServers() ([]Server, error) {
@@ -189,4 +182,15 @@ func getServers() ([]Server, error) {
 	})
 
 	return servers, nil
+}
+
+func printServers(servers []Server) {
+	for i, server := range servers {
+		fmt.Printf("%d) %s: ", i+1, server.Name)
+		if server.IsBlocked {
+			fmt.Println("Blocked")
+		} else {
+			fmt.Println("Available")
+		}
+	}
 }
