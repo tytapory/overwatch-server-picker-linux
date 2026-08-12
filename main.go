@@ -147,13 +147,14 @@ func getNearestServer(servers []Server) (Server, error) {
 				return nearestServer, fmt.Errorf("no IP address provided for server: %s", server.Name)
 			}
 
-			for i := 1; i < 10 && currentPing == math.MaxFloat64; i++ {
-				addr := prefix.Addr()
-
+			addr := prefix.Addr()
+			for i := 1; i < 5 && currentPing == math.MaxFloat64; i++ {
 				currentPing, err = ping(addr.String())
 				if err != nil {
 					currentPing = math.MaxFloat64
 				}
+
+				addr = prefix.Addr().Next()
 			}
 		}
 
@@ -162,7 +163,11 @@ func getNearestServer(servers []Server) (Server, error) {
 			nearestServer = server
 		}
 
-		fmt.Printf("%s ping %f\n", server.Name, currentPing)
+		if currentPing < math.MaxFloat64 {
+			fmt.Printf("%s ping %f\n", server.Name, currentPing)
+		} else {
+			fmt.Printf("%s no responce\n", server.Name)
+		}
 	}
 
 	if smallestPing == math.MaxFloat64 {
@@ -403,6 +408,7 @@ func ping(address string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer pinger.Stop()
 
 	pinger.Count = 4
 	pinger.Interval = 900 * time.Millisecond
