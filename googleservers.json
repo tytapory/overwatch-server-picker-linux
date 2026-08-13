@@ -1,10 +1,10 @@
 {
   "southamerica-east1": {
-	"name": "Brazil2",
+	"name": "Brazil",
   	"ping": "34.39.128.0"
   },
   "europe-north1": {
-	"name": "Finland2",
+	"name": "Finland",
 	"ping": "34.88.0.1"
   },
   "me-central2": {
@@ -12,15 +12,15 @@
   	"ping": "34.166.0.85"
   },
   "asia-southeast1": {
-	"name": "Singapore2",
+	"name": "Singapore",
 	"ping": "34.1.128.4"
   },
   "asia-northeast1": {
-	"name": "Japan2",
+	"name": "Japan",
 	"ping": "34.84.0.0"
   },
   "us-east4": {
-	"name": "Usa_East2",
+	"name": "Usa_East",
 	"ping": "8.228.65.55"
   }
 }
