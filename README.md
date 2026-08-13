@@ -1,6 +1,6 @@
 # Overwatch server picker for linux
 
-A simple CLI tool to select Overwatch servers on Linux.
+A simple CLI overwatch server selector on Linux.
 
 ### Dependencies
 * `golang`
